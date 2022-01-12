@@ -1,0 +1,18 @@
+{
+  "template": "https://github.com/woltapp/wolt-python-package-cookiecutter",
+  "commit": "4d43272b597f1d7561176afabd4b245ab7f74ea8",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "author_name": "Jack Nurminen",
+      "author_email": "jack.nurminen@gmail.com",
+      "github_username": "jacknurminen",
+      "project_name": "torchdemon",
+      "project_slug": "torchdemon",
+      "package_name": "torchdemon",
+      "project_short_description": "Inference server for RL",
+      "_template": "https://github.com/woltapp/wolt-python-package-cookiecutter"
+    }
+  },
+  "directory": null
+}
