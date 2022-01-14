@@ -1,9 +1,9 @@
 from unittest.mock import Mock, call, patch
 
-import numpy as np
 import pytest
 
 from tests import factories
+from tests.utils import assert_ndarray_eq
 from torchdemon.inference_scheduler import InferenceScheduler
 from torchdemon.models import InferencePayload, InferenceRequest, Signal
 
@@ -67,9 +67,9 @@ def test_check(
     assert mock_connection.send.call_count == 2
 
     send_args, _ = mock_connection.send.call_args_list[0]
-    _assert_ndarray_eq(send_args[0]["output"], infer_output[0])
+    assert_ndarray_eq(send_args[0]["output"], infer_output[0])
     send_args, _ = mock_connection.send.call_args_list[1]
-    _assert_ndarray_eq(send_args[0]["output"], infer_output[1])
+    assert_ndarray_eq(send_args[0]["output"], infer_output[1])
 
 
 def test_close_connection(
@@ -94,8 +94,3 @@ def test_close_connection(
     assert mock_connection.close.call_count == 1
     assert not inference_scheduler.connections_open()
     assert not inference_scheduler._connections
-
-
-def _assert_ndarray_eq(ndarr1: np.ndarray, ndarr2: np.ndarray) -> None:
-    assert ndarr1.shape == ndarr2.shape
-    assert np.sum(ndarr1 - ndarr2) == 0
