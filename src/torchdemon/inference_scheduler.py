@@ -1,5 +1,5 @@
-import multiprocessing as mp
 from collections import defaultdict
+from multiprocessing import Pipe
 from multiprocessing.connection import Connection
 from typing import Dict, List
 from uuid import UUID
@@ -7,26 +7,26 @@ from uuid import UUID
 import numpy as np
 
 from torchdemon.inference_client import InferenceClient
-from torchdemon.model import InferenceModel
+from torchdemon.inference_model import InferenceModel
+from torchdemon.inference_queue import InferenceQueue
 from torchdemon.models import (
     INFERENCE_DATA_T,
     InferencePayload,
     InferenceResult,
     Signal,
 )
-from torchdemon.queue import InferenceQueue
 
 
 class InferenceScheduler:
-    def __init__(self, model: InferenceModel, batch_size: int, max_wait_ns: int):
-        self._model = model
+    def __init__(
+        self, inference_model: InferenceModel, inference_queue: InferenceQueue
+    ):
+        self._inference_model = inference_model
+        self._inference_queue = inference_queue
         self._connections: Dict[UUID, Connection] = {}
-        self._inference_queue = InferenceQueue(
-            batch_size=batch_size, max_wait_ns=max_wait_ns
-        )
 
     def create_client(self) -> InferenceClient:
-        server_connection, client_connection = mp.Pipe()
+        server_connection, client_connection = Pipe()
         inference_client = InferenceClient(client_connection)
         self._connections[inference_client.client_id] = server_connection
         return inference_client
@@ -37,7 +37,7 @@ class InferenceScheduler:
             if connection.poll():
                 inference_request = connection.recv()
 
-                if inference_request.data == Signal.KILL:
+                if inference_request.data == Signal.CLOSE:
                     self._connections[inference_request.client_id].close()
                     closed_clients.append(inference_request.client_id)
                     continue
@@ -79,7 +79,7 @@ class InferenceScheduler:
                 inference_data[k].append(ndarr)
 
         batched_inputs = {k: np.vstack(ndarrs) for k, ndarrs in inference_data.items()}
-        batched_outputs = self._model.infer(**batched_inputs)
+        batched_outputs = self._inference_model.infer(**batched_inputs)
 
         inference_results = []
         for i, inference_payload in enumerate(inference_payloads_batch):

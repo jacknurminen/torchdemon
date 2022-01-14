@@ -7,7 +7,7 @@ import numpy as np
 
 
 class Signal(IntEnum):
-    KILL = 0
+    CLOSE = 0
 
 
 INFERENCE_DATA_T = Dict[str, np.ndarray]
