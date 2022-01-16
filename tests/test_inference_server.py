@@ -84,16 +84,16 @@ def test_check_batch_full(mock_time: Mock) -> None:
     assert client2.connection.send.call_count == 1
 
     args, _ = client1.connection.send.call_args_list[0]
-    model_output = args[0]
-    assert len(model_output) == 2
-    assert_ndarray_eq(model_output[0], torch_model_output[0][0].numpy())
-    assert_ndarray_eq(model_output[1], torch_model_output[1][0].numpy())
+    inference_result = args[0]
+    assert len(inference_result.data) == 2
+    assert_ndarray_eq(inference_result.data[0], torch_model_output[0][0].numpy())
+    assert_ndarray_eq(inference_result.data[1], torch_model_output[1][0].numpy())
 
     args, _ = client2.connection.send.call_args_list[0]
-    model_output = args[0]
-    assert len(model_output) == 2
-    assert_ndarray_eq(model_output[0], torch_model_output[0][1].numpy())
-    assert_ndarray_eq(model_output[1], torch_model_output[1][1].numpy())
+    inference_result = args[0]
+    assert len(inference_result.data) == 2
+    assert_ndarray_eq(inference_result.data[0], torch_model_output[0][1].numpy())
+    assert_ndarray_eq(inference_result.data[1], torch_model_output[1][1].numpy())
 
     # First client closes connection
     client1.connection.poll.return_value = True
@@ -197,14 +197,14 @@ def test_check_wait(mock_time: Mock) -> None:
     assert client2.connection.send.call_count == 1
 
     args, _ = client1.connection.send.call_args_list[0]
-    model_output = args[0]
-    assert len(model_output) == 1
-    assert_ndarray_eq(model_output[0], torch_model_output[0].numpy())
+    inference_result = args[0]
+    assert len(inference_result.data) == 1
+    assert_ndarray_eq(inference_result.data[0], torch_model_output[0].numpy())
 
     args, _ = client2.connection.send.call_args_list[0]
-    model_output = args[0]
-    assert len(model_output) == 1
-    assert_ndarray_eq(model_output[0], torch_model_output[1].numpy())
+    inference_result = args[0]
+    assert len(inference_result.data) == 1
+    assert_ndarray_eq(inference_result.data[0], torch_model_output[1].numpy())
 
 
 @patch("torchdemon.inference_queue.time.time_ns")

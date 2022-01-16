@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple, Union
 
 from torchdemon.models import (
     InferenceInputData,
@@ -19,7 +19,9 @@ class InferenceClient:
         self._connection = connection
         self.client_id = uuid.uuid4()
 
-    def forward(self, *args: "np.ndarray", **kwargs: "np.ndarray") -> InferenceResult:
+    def forward(
+        self, *args: "np.ndarray", **kwargs: "np.ndarray"
+    ) -> Union["np.ndarray", Tuple["np.ndarray", ...]]:
         inference_request = InferenceRequest(
             self.client_id, data=InferenceInputData(args=list(args), kwargs=kwargs)
         )
@@ -27,7 +29,12 @@ class InferenceClient:
         while True:
             if self._connection.poll():
                 inference_result: InferenceResult = self._connection.recv()
-                return inference_result
+                if len(inference_result.data) == 1:
+                    ndarr: "np.ndarray" = inference_result.data[0]
+                    return ndarr
+                else:
+                    ndarrs: Tuple["np.ndarray", ...] = tuple(inference_result.data)
+                    return ndarrs
 
     def close(self) -> None:
         inference_request = InferenceRequest(self.client_id, data=Signal.CLOSE)
