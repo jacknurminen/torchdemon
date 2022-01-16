@@ -2,12 +2,7 @@ from uuid import UUID, uuid4
 
 import numpy as np
 
-from torchdemon.models import (
-    INFERENCE_DATA_T,
-    InferencePayload,
-    InferenceRequest,
-    InferenceResult,
-)
+from torchdemon.models import InferenceInputData
 
 
 def uuid_const() -> UUID:
@@ -18,29 +13,15 @@ def uuid_rand() -> UUID:
     return uuid4()
 
 
-def ndarray() -> np.ndarray:
-    return np.arange(start=0.0, stop=10.0, step=2.0)
+def ndarray_randint(*args: int) -> np.ndarray:
+    return np.random.randint(0, 10, size=args)
 
 
 def ndarray_rand(*args: int) -> np.ndarray:
     return np.random.rand(*args)
 
 
-def inference_data_const() -> INFERENCE_DATA_T:
-    return {"input": ndarray()}
-
-
-def inference_data_rand() -> INFERENCE_DATA_T:
-    return {"input": ndarray_rand(5)}
-
-
-def inference_request() -> InferenceRequest:
-    return InferenceRequest(client_id=uuid_const(), data=inference_data_rand())
-
-
-def inference_payload() -> InferencePayload:
-    return InferencePayload(client_id=uuid_const(), data=inference_data_rand())
-
-
-def inference_result() -> InferenceResult:
-    return InferenceResult(client_id=uuid_const(), data=inference_data_rand())
+def inference_input_data() -> InferenceInputData:
+    return InferenceInputData(
+        args=[ndarray_randint(2), ndarray_rand(4)], kwargs={"input": ndarray_rand(6)}
+    )

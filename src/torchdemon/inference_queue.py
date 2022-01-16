@@ -15,7 +15,7 @@ class InferenceQueue:
         self._payloads_batch: List[InferencePayload] = []
         self._last_ns = time.time_ns()
 
-    def process_request(
+    def check_batch_size(
         self, inference_payload: InferencePayload
     ) -> Optional[List[InferencePayload]]:
         self._payloads_batch.append(inference_payload)

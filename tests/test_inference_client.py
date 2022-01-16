@@ -1,47 +1,45 @@
-from unittest.mock import Mock, patch
-
-import pytest
+from unittest.mock import Mock
 
 from tests import factories
 from tests.utils import assert_ndarray_eq
 from torchdemon.inference_client import InferenceClient
-from torchdemon.models import InferenceRequest, Signal
+from torchdemon.models import InferenceRequest, InferenceResult, Signal
 
 
-@pytest.fixture
-def mock_connection() -> Mock:
-    with patch("torchdemon.inference_client.Connection") as mock_connection:
-        mock_connection.poll.return_value = True
-        return mock_connection
-
-
-def test_forward(mock_connection: Mock) -> None:
+def test_forward() -> None:
+    mock_connection = Mock()
+    mock_connection.poll.return_value = True
     inference_client = InferenceClient(mock_connection)
 
-    mock_inference_result = factories.inference_result()
-    mock_inference_result.client_id = inference_client.client_id
+    mock_inference_result = InferenceResult(
+        client_id=inference_client.client_id, data=[factories.ndarray_rand(5)]
+    )
     mock_connection.recv.return_value = mock_inference_result
 
-    inference_request = factories.inference_payload()
-    inference_request.client_id = inference_client.client_id
+    forward_arg = factories.ndarray_rand(4)
+    forward_kwarg = factories.ndarray_rand(6)
+    inference_result = inference_client.forward(forward_arg, input=forward_kwarg)
 
-    inference_result = inference_client.forward(input=inference_request.data["input"])
+    assert mock_connection.poll.call_count == 1
+    assert mock_connection.send.call_count == 1
+    assert mock_connection.recv.call_count == 1
 
-    send_args, _ = mock_connection.send.call_args_list[0]
-    send_args[0].client_id = inference_request.client_id
-    assert_ndarray_eq(send_args[0].data["input"], inference_request.data["input"])
+    assert inference_result.client_id == mock_inference_result.client_id
+    assert_ndarray_eq(inference_result.data[0], mock_inference_result.data[0])
 
-    mock_connection.poll.assert_called_once()
-    assert inference_result == mock_inference_result
+    sent_args, _ = mock_connection.send.call_args_list[0]
+    sent_inference_request = sent_args[0]
+    assert_ndarray_eq(forward_arg, sent_inference_request.data.args[0])
+    assert_ndarray_eq(forward_kwarg, sent_inference_request.data.kwargs["input"])
 
 
-def test_close(mock_connection: Mock) -> None:
+def test_close() -> None:
+    mock_connection = Mock()
     inference_client = InferenceClient(mock_connection)
-    inference_request = InferenceRequest(
-        client_id=inference_client.client_id, data=Signal.CLOSE
-    )
 
     inference_client.close()
 
-    mock_connection.send.assert_called_once_with(inference_request)
+    mock_connection.send.assert_called_once_with(
+        InferenceRequest(client_id=inference_client.client_id, data=Signal.CLOSE)
+    )
     mock_connection.close.assert_called_once()
