@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "torchdemon"
-version = "0.0.1"
+version = "0.0.2"
 description = "Inference server for RL"
 authors = [
     "Jack Nurminen <jack.nurminen@gmail.com>",
