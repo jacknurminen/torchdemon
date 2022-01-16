@@ -16,12 +16,67 @@
 
 ---
 
-Inference server for RL
+# Inference Server for RL
+
+__Inference Server__. Serve model on GPU to workers. Workers communicate with the inference server over
+multiprocessing Pipe connections.
+
+__Dynamic Batching__. Accumulate batches from workers for forward passes. Set maximum batch size or maximum wait time
+for releasing batch for inference.
+
 
 ## Installation
 
 ```sh
 pip install torchdemon
+```
+
+## Usage
+
+Define a model
+```python
+import torch
+
+class Model(torch.nn.Module):
+    def __init__(self, input_size: int, output_size: int):
+        super(Model, self).__init__()
+        self.linear = torch.nn.Linear(input_size, output_size)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.linear(x)
+
+model = Model(8, 4)
+```
+
+Create an inference server for the model
+
+```python
+import torchdemon
+
+inference_server = torchdemon.InferenceServer(
+    model, batch_size=8, max_wait_ns=1000000, device=torch.device("cuda:0")
+)
+```
+
+Create an inference client per agent and run in parallel processes
+```python
+import multiprocessing
+
+processes = []
+for _ in range(multiprocessing.cpu_count()):
+    inference_client = inference_server.create_client()
+    agent = Agent(inference_client)
+    process = multiprocessing.Process(target=play, args=(agent,))
+    process.start()
+    processes.append(process)
+```
+
+Run server
+```python
+inference_server.run()
+
+for process in processes:
+    process.join()
 ```
 
 ## Development

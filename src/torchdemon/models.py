@@ -1,33 +1,38 @@
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Dict, Union
+from typing import TYPE_CHECKING, Dict, List, TypeVar, Union
 from uuid import UUID
 
-import numpy as np
+if TYPE_CHECKING:
+    import numpy as np
+    import torch
+
+TORCH_MODEL_T = TypeVar("TORCH_MODEL_T", bound="torch.nn.Module")
 
 
 class Signal(IntEnum):
     CLOSE = 0
 
 
-INFERENCE_DATA_T = Dict[str, np.ndarray]
-
-INFERENCE_REQUEST_DATA_T = Union[INFERENCE_DATA_T, Signal]
+@dataclass
+class InferenceInputData:
+    args: List["np.ndarray"]
+    kwargs: Dict[str, "np.ndarray"]
 
 
 @dataclass
 class InferenceRequest:
     client_id: UUID
-    data: INFERENCE_REQUEST_DATA_T
+    data: Union[InferenceInputData, Signal]
 
 
 @dataclass
 class InferencePayload:
     client_id: UUID
-    data: INFERENCE_DATA_T
+    data: InferenceInputData
 
 
 @dataclass
 class InferenceResult:
     client_id: UUID
-    data: INFERENCE_DATA_T
+    data: List["np.ndarray"]
