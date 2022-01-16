@@ -53,7 +53,7 @@ class InferenceServer:
                 ):
                     for inference_result in inference_results:
                         self._connections[inference_result.client_id].send(
-                            inference_result.data
+                            inference_result
                         )
 
         self._connections = {

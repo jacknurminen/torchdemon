@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Return `InferenceResult` to inference client from server
+- Return result ndarrays from `InferenceClient` `forward`
+
 ## [0.0.2] - 2022-01-16
 ### Added
 - `inference_server`
