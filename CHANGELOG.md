@@ -5,8 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.0.3] - 2022-01-16
 ### Changed
-
 - Return `InferenceResult` to inference client from server
 - Return result ndarrays from `InferenceClient` `forward`
 
@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `inference_model`
 - `inference_queue`
 
-[Unreleased]: https://github.com/jacknurminen/torchdemon/compare/0.0.2...master
+[Unreleased]: https://github.com/jacknurminen/torchdemon/compare/0.0.3...master
+[0.0.3]: https://github.com/jacknurminen/torchdemon/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/jacknurminen/torchdemon/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/jacknurminen/torchdemon/tree/0.0.1
